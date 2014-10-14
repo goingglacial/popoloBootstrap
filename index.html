@@ -16,6 +16,7 @@
 
     <!-- Custom CSS -->
     <link href="css/grayscale.css" rel="stylesheet">
+    <link href="css/jquery-ui.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -24,10 +25,57 @@
 
     <!-- Scripts -->
     <script src="js/jquery-1.11.0.js"></script>
+    <script src="js/jquery-ui.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery.easing.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCYbpxZxn5yE4DVDv3tn97LxQ8LSlo3wf0"></script>
     <script src="js/grayscale.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#cities").autocomplete({ 
+                delay: 0,
+                  select: function( event, ui ) {
+                    console.log(ui.item);
+                    $( "#cities" ).val( ui.item.label );
+                    $( "#results" ).html( ui.item.desc );
+             
+                    return false;
+                  },
+                  focus: function( event, ui ) {
+                    $( "#results" ).html("");
+                    return false;
+                  },
+                  source: function(request, response) {
+                    var base = 'search/' + encodeURI($("#cities").val());
+                    //var base = 'search/'' + $("#cities").val()';
+                    console.log(base);
+
+                        $.ajax({
+                            dataType: "json",
+                            type : 'Get',
+                            url: base,
+                            success: function(data) {
+                                // console.log(data);
+
+                                response(data.map(function(d) {
+                                    return {label: (d.city + ", " + d.state), desc: d.pop};//(d.city + ', ' + d.state + ': ' + d.pop);
+                                }));
+                            },
+                            error: function(data) {
+                                console.log("ERROR");
+                            }
+                        });
+                }
+            }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+
+            return $( "<li>" )
+                .append( "<a>" + item.label + "<br>" + item.desc + "</a>" )
+                .appendTo( ul );
+            };
+            ;
+            });
+
+    </script>
 
 </head>
 
@@ -52,7 +100,8 @@
                     <li class="hidden">
                         <a href="#page-top"></a>
                     </li>
-
+                    <li>
+                        <a class="page-scroll" href="#search">Search</a>
                     <li>
                         <a class="page-scroll" href="#contact">About</a>
                     </li>
@@ -86,7 +135,14 @@
             <div class="container">
                 <div class="col-lg-8 col-lg-offset-2">
                     <h2 id="search_header">Search U.S. City Populations</h2>
-
+                    <center>
+                        <div class="ui-widget">
+                            <input id="cities" type="text">
+                            <center>
+                                <div id="results"></div>
+                            </center>
+                        </div>     
+                    </center>   
                 </div>
             </div>
         </div>
